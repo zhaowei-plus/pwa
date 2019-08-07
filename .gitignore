@@ -1,7 +1,6 @@
     
 .DS_Store
 node_modules/
-/dist/
 router-config.js*
 npm-debug.log*
 package-lock.json*
