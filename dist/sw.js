@@ -1,22 +1,27 @@
+/**
+ * 注册完service worker脚本之后，具体逻辑行为则在本文件实现
+ * */
+
+// 用来标注创建的缓存，也可以根据此标志来建立版本规范
 const cacheStorageKey = 'minimal-pwa-3'
 
+// 需要缓存的静态资源，一般用于离线使用
 const cacheList = [
   '/',
   'index.html',
-  'main.css',
-  'e.png',
-  'pwa-fonts.png',
+  'cache.css',
+  'pwa.png',
 ];
 
-// 当浏览器解析完毕sw闻不见是，serviceWorker内部触发install事件
+// 当sw.js被安装时，serviceWorker内部触发install事件，常用来缓存用于离线时使用的静态资源
 self.addEventListener('install', function(e) {
   console.log('Cache event!')
-
-  // 打开缓存空间，将线相关需要缓存的资源添加到缓存中
   /**
    * 打开缓存空间，将线相关需要缓存的资源添加到缓存中
-   * 
-   * e.waitUntil() 接受Promise对象等待资源缓存成功
+   * e.waitUntil() 用于在安装成功之前执行一些预装逻辑，接受Promise对象等待资源缓存成功
+   *
+   * 注: 推荐只做一些轻量级和非常重要资源的缓存，减少安装失败的概率，安装成功后
+   * ServiceWorker 状态会从 installing 变为 installed
    */
   e.waitUntil(
     /**
@@ -34,6 +39,8 @@ self.addEventListener('install', function(e) {
 /**
  * 如果当前浏览器没有激活的service worker或者已经激活的worker被解雇，
  * 新的service worker进入active事件
+ *
+ * 此事件侦听器可以用来清理过时的缓存资源
  */
 self.addEventListener('activate', function(e) {
   console.log('Activate event');

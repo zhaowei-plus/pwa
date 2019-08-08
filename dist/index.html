@@ -1,39 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="./cache.css">
-    <title>pwa</title>
-  </head>
-  <body>
-    <div id="app">app</div>
-    <script>
-      if ('serviceWorker' in navigator) {
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="app/cache.css">
+  <title>Service Worker</title>
+</head>
+<body>
+<div id="app">
+  <img src="app/pwa.png">
 
-        window.addEventListener('load', function () {
-          // 1、注册 serviceWorker，返回 promise 对象
-          navigator.serviceWorker.register('/sw.js')
-          .then((registration) => {
-            window.registration = registration
-            console.log('Service Worker Registration')
-
-            /**
-             * 主线程中返回的状态 waitting 表示ServiceWorker 进入 installed 状态
-            */
-            if (registration.waitting) {
-              console.log(' Service Worker is Waiting')
-            }
-
-            if (registration.active) {
-              console.log(' Service Worker is Activate')
-            }
-          }, (err) => {
-            console.log(err)
-          })
-        })
-      }
-    </script>
-  </body>
+  <a href="chrome://serviceworker-internals/">Service Worker使用信息</a>
+</div>
+<script src="index.js"></script>
+</body>
 </html>
