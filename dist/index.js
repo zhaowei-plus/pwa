@@ -1,7 +1,8 @@
+let worker;
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
         // 1、注册 serviceWorker，返回 promise 对象
-        navigator.serviceWorker.register('/sw.js',  {
+        worker = navigator.serviceWorker.register('/sw.js',  {
             scope:  '/app/'
         })
             .then((registration) => {

@@ -6,13 +6,24 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="app/cache.css">
   <title>Service Worker</title>
+  <script src="index.js"></script>
+  <script>
+    function onfetch() {
+      fetch('./app/data.json',  { credentials: 'include' })
+              .then(function(response) {
+                return response.json();
+              })
+              .then(function(response) {
+                console.log('response:', response)
+              });
+    }
+  </script>
 </head>
 <body>
 <div id="app">
   <img src="app/pwa.png">
-
+    <button onclick="onfetch()">获取数据</button>
   <a href="chrome://serviceworker-internals/">Service Worker使用信息</a>
 </div>
-<script src="index.js"></script>
 </body>
 </html>

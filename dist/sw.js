@@ -1,5 +1,7 @@
 /**
  * 注册完service worker脚本之后，具体逻辑行为则在本文件实现
+ *
+ * https://lzw.me/a/pwa-service-worker.html
  * */
 
 // 用来标注创建的缓存，也可以根据此标志来建立版本规范
@@ -67,23 +69,67 @@ self.addEventListener('activate', function(e) {
   )
 })
 
-// 监听service worker fetch
-self.addEventListener('fetch', function (event) {
-  console.log('Fetch event ' + cacheStorageKey + ' :', e.request.url);
-
-  // 首先判断缓存当中是否已有相同资源
-  event.respondWith(
-    caches.match(event.request)
-        .then(function(response) {
-            // 在缓存中查找到匹配的请求，就从缓存返回
-            if (response) {
-                console.log('Using cache for:', e.request.url)
-                return response;
-            }
-            // 缓存中没有查找到对应请求，继续网络请求
-            console.log('Fallback to fetch:', e.request.url)
-            return fetch(e.request.url);
+// 联网状态下执行
+function onlineRequest(fetchRequest) {
+    // 使用 fecth API 获取资源，以实现对资源请求控制
+    return fetch(fetchRequest).then(response => {
+        // 在资源请求成功后，将 image、js、css 资源加入缓存列表
+        if (
+            !response
+            || response.status !== 200
+            || !response.headers.get('Content-type').match(/image|javascript|test\/css/i)
+        ) {
+            return response;
         }
-    )
-  );
-})
+
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME)
+            .then(function (cache) {
+                cache.put(event.request, responseToCache);
+            });
+
+        return response;
+    }).catch(() => {
+        // 获取失败，离线资源降级替换
+        offlineRequest(fetchRequest);
+    });
+}
+// 离线状态下执行，降级替换
+function offlineRequest(request) {
+    // 使用离线图片
+    if (request.url.match(/\.(png|gif|jpg)/i)) {
+        return caches.match('/images/offline.png');
+    }
+
+    // 使用离线页面
+    if (request.url.match(/\.html$/)) {
+        return caches.match('/test/offline.html');
+    }
+}
+
+self.addEventListener('fetch', event => {
+    console.log('watch fetch')
+    event.respondWith(
+        caches.match(event.request)
+            .then(hit => {
+                // 返回缓存中命中的文件
+                if (hit) {
+                    return hit;
+                }
+
+                const fetchRequest = event.request.clone();
+
+                if (navigator.online) {
+                    // 如果为联网状态
+                    return onlineRequest(fetchRequest);
+                } else {
+                    // 如果为离线状态
+                    return offlineRequest(fetchRequest);
+                }
+            })
+    );
+});
+
+self.addEventListener('message', function(event){
+    console.log("SW Received Message: " + event.data);
+});
